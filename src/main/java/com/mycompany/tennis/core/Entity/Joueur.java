@@ -1,6 +1,8 @@
 package com.mycompany.tennis.core.Entity;
 
+
 public class Joueur {
+
     private Long id;
     private  String nom;
     private  String prenom;
