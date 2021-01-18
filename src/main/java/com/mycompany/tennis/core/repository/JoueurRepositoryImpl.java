@@ -1,8 +1,10 @@
 package com.mycompany.tennis.core.repository;
 
 import com.mycompany.tennis.core.DataSourceProvider;
-import com.mycompany.tennis.core.Entity.Joueur;
-import org.apache.commons.dbcp2.BasicDataSource;
+import com.mycompany.tennis.core.entity.Joueur;
+import org.hibernate.Session;
+import com.mycompany.tennis.core.HibernateUtil;
+import org.hibernate.Transaction;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -11,50 +13,55 @@ import java.util.List;
 
 public class JoueurRepositoryImpl {
 
-    public void create(Joueur joueur){
-        Connection conn = null;
+    public void renome(Long id, String nouveauNom){
+        Session session=null;
+        Joueur joueur=null;
+        Transaction tx =null;
         try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            //MySQL driver MySQL Connector
-            conn = dataSource.getConnection();
-
-            PreparedStatement statement = conn.prepareStatement("INSERT INTO JOUEUR (NOM,PRENOM,SEXE) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
-
-            statement.setString(1,joueur.getNom());
-            statement.setString(2,joueur.getPrenom());
-            statement.setString(3,joueur.getSexe().toString());
-
-            statement.executeUpdate();
-
-            ResultSet rs = statement.getGeneratedKeys();
-
-            if(rs.next()){
-                joueur.setId(rs.getLong(1)); //position de la colonne dans la bdd
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+            joueur = session.get(Joueur.class,id);
+            joueur.setNom(nouveauNom);
+            tx.commit();
+            System.out.println("Nom du joueur modifié");
+        } catch(Exception e){
+            if(tx!=null){
+                tx.rollback();
             }
-
-
-
-            System.out.println("Joueur créé");
-        } catch (SQLException e) {
             e.printStackTrace();
-
-            try {
-                if(conn!=null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-
         }
         finally {
-            try {
-                if (conn!=null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if(session!=null){
+                session.close();
+            }
+        }
+    }
+
+    public void create(Joueur joueur){
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession(); //recupere une session vide Hibernate
+            tx = session.beginTransaction(); // il faut definir une transaction pour ecrire dans la bdd (execute con.autocommit(false) dans la session)
+            /*
+            methode à appler dans la majorité des cas pour faire un insert.
+            Rends l'etat de l'objet de transient à persistent dans la session
+            Mais persist ne suffit pas pour ecrire dans la base de donnée
+            */
+            session.persist(joueur);
+            //session.flush(); //synchronise l'etat de la session avec la bdd en effectuant les requetes sql et execute con.commit()
+            tx.commit(); //declenche le flush de la session. preferable d'appeler cette instruction et laisser hibernate faire le flush
+
+            System.out.println("Joueur créé");
+        } catch(Exception e){
+            if(tx!=null){
+                tx.rollback();
+            }
+            e.printStackTrace();
+        }
+        finally {
+            if(session!=null){
+                session.close();
             }
         }
     }
@@ -143,49 +150,19 @@ public class JoueurRepositoryImpl {
     }
 
     public Joueur getById(long id){
-        Connection conn = null;
+        Session session=null;
         Joueur joueur=null;
         try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            //MySQL driver MySQL Connector
-            conn = dataSource.getConnection();
-
-            PreparedStatement statement = conn.prepareStatement("SELECT NOM,PRENOM,SEXE FROM JOUEUR WHERE ID=?");
-
-            statement.setLong(1,id);
-
-            ResultSet rs = statement.executeQuery();
-
-            if(rs.next()){
-                joueur = new Joueur();
-                joueur.setId(id);
-                joueur.setNom(rs.getString("nom"));
-                joueur.setPrenom(rs.getString("prenom"));
-                joueur.setSexe(rs.getString("sexe").charAt(0));
-            }
-
-
+            session = HibernateUtil.getSessionFactory().openSession();
+            joueur = session.get(Joueur.class,id);
             System.out.println("Joueur lu");
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                if(conn!=null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-
+        }
+        catch(Throwable t){
+            t.printStackTrace();
         }
         finally {
-            try {
-                if (conn!=null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if(session!=null){
+                session.close();
             }
         }
         return joueur;

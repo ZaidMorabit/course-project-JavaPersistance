@@ -1,4 +1,4 @@
-package com.mycompany.tennis.core.Entity;
+package com.mycompany.tennis.core.entity;
 
 public class Epreuve {
 

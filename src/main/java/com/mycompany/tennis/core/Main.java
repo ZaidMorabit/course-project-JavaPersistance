@@ -1,14 +1,8 @@
 package com.mycompany.tennis.core;
 
-import com.mycompany.tennis.core.Entity.*;
-import com.mycompany.tennis.core.repository.JoueurRepositoryImpl;
-import com.mycompany.tennis.core.repository.TournoiRepositoryImpl;
+import com.mycompany.tennis.core.entity.*;
 import com.mycompany.tennis.core.service.JoueurService;
 import com.mycompany.tennis.core.service.MatchService;
-import com.mysql.cj.jdbc.MysqlDataSource;
-import org.apache.commons.dbcp2.BasicDataSource;
-
-import java.sql.*;
 
 public class Main {
     public static void main(String... args){

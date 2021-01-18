@@ -1,7 +1,6 @@
 package com.mycompany.tennis.core.service;
 
-import com.mycompany.tennis.core.Entity.Joueur;
-import com.mycompany.tennis.core.Entity.Tournoi;
+import com.mycompany.tennis.core.entity.Tournoi;
 import com.mycompany.tennis.core.repository.TournoiRepositoryImpl;
 
 public class TournoiService {
@@ -18,4 +17,5 @@ public class TournoiService {
     public void createTournoi(Tournoi tournoi){
         tournoiRepository.create(tournoi);
     }
+
 }

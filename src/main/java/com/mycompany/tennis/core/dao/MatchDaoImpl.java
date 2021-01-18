@@ -1,7 +1,7 @@
 package com.mycompany.tennis.core.dao;
 
 import com.mycompany.tennis.core.DataSourceProvider;
-import com.mycompany.tennis.core.Entity.Match;
+import com.mycompany.tennis.core.entity.Match;
 
 import javax.sql.DataSource;
 import java.sql.*;
