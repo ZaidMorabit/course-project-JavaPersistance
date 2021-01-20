@@ -13,24 +13,9 @@ import java.util.List;
 
 public class TournoiRepositoryImpl {
     public void create(Tournoi tournoi){
-        Session session = null;
-        Transaction tx = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.persist(tournoi);
-            tx.commit();
-
-        }catch (Exception e){
-            if(tx != null){
-                tx.rollback();
-            }
-            e.printStackTrace();
-        }
-        finally {
-
-        }
-
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.persist(tournoi);
+        System.out.println("Tournoi créé");
     }
 
     public void update(Tournoi tournoi){
@@ -39,31 +24,16 @@ public class TournoiRepositoryImpl {
     }
 
     public void delete(long id){
-        Tournoi tournoi = new Tournoi();
-        tournoi.setId(id);
+        Tournoi tournoi = getById(id);
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.delete(tournoi);
         System.out.println("Tournoi supprimé");
     }
 
     public Tournoi getById(long id){
-        Session session=null;
-        Tournoi tournoi=null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tournoi = session.get(Tournoi.class,id);
-
-
-            System.out.println("Tournoi lu");
-        } catch (Throwable t) {
-            t.printStackTrace();
-
-        }
-        finally {
-            if (session!= null) {
-                session.close();
-            }
-        }
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Tournoi tournoi = session.get(Tournoi.class,id);
+        System.out.println("Tournoi lu");
         return tournoi;
     }
 

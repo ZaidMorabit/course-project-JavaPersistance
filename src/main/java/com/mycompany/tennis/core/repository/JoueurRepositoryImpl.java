@@ -5,6 +5,7 @@ import com.mycompany.tennis.core.entity.Joueur;
 import org.hibernate.Session;
 import com.mycompany.tennis.core.HibernateUtil;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class JoueurRepositoryImpl {
 
-    public void renome(Long id, String nouveauNom){
+    /*public void renome(Long id, String nouveauNom){
         Session session=null;
         Joueur joueur=null;
         Transaction tx =null;
@@ -35,19 +36,19 @@ public class JoueurRepositoryImpl {
                 session.close();
             }
         }
-    }
+    }*/
 
-    public void create(Joueur joueur){
+    /*public void create(Joueur joueur){
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession(); //recupere une session vide Hibernate
             tx = session.beginTransaction(); // il faut definir une transaction pour ecrire dans la bdd (execute con.autocommit(false) dans la session)
-            /*
+            *//*
             methode à appler dans la majorité des cas pour faire un insert.
             Rends l'etat de l'objet de transient à persistent dans la session
             Mais persist ne suffit pas pour ecrire dans la base de donnée
-            */
+            *//*
             session.persist(joueur);
             //session.flush(); //synchronise l'etat de la session avec la bdd en effectuant les requetes sql et execute con.commit()
             tx.commit(); //declenche le flush de la session. preferable d'appeler cette instruction et laisser hibernate faire le flush
@@ -64,155 +65,45 @@ public class JoueurRepositoryImpl {
                 session.close();
             }
         }
-    }
+    }*/
 
-    public void update(Joueur joueur){
-        Connection conn = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            //MySQL driver MySQL Connector
-            conn = dataSource.getConnection();
-
-            PreparedStatement statement = conn.prepareStatement("UPDATE JOUEUR SET NOM=?,PRENOM=?,SEXE=? WHERE ID=?");
-
-            statement.setString(1,joueur.getNom());
-            statement.setString(2,joueur.getPrenom());
-            statement.setString(3,joueur.getSexe().toString());
-            statement.setLong(4,joueur.getId());
-
-            statement.executeUpdate();
-
-
-
-            System.out.println("Joueur modifié");
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                if(conn!=null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-
+    public void create(Joueur joueur){
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.persist(joueur);
+        System.out.println("Joueur créé");
         }
-        finally {
-            try {
-                if (conn!=null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     public void delete(long id){
-        Connection conn = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
 
-            //MySQL driver MySQL Connector
-            conn = dataSource.getConnection();
+        Joueur joueur = getById(id);
 
-            PreparedStatement statement = conn.prepareStatement("DELETE FROM JOUEUR WHERE ID=?");
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 
-            statement.setLong(1,id);
+        session.delete(joueur);
 
-            statement.executeUpdate();
-
-
-
-            System.out.println("Joueur supprimé");
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                if(conn!=null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-
-        }
-        finally {
-            try {
-                if (conn!=null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println("Joueur supprimé");
     }
 
     public Joueur getById(long id){
         Session session=null;
         Joueur joueur=null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            joueur = session.get(Joueur.class,id);
-            System.out.println("Joueur lu");
-        }
-        catch(Throwable t){
-            t.printStackTrace();
-        }
-        finally {
-            if(session!=null){
-                session.close();
-            }
-        }
+
+        //on recupere une session courrante et pas une session neuve car quand on effectue un update on appelle cette methode
+        //il faut avoir la meme session que la methode update si on veut partager les objets qui y sont stocké pour les push apres dans la bdd
+        // le scope de la session est configurée dans le fichier hibernae.cfg.xml
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
+        joueur = session.get(Joueur.class,id);
+        System.out.println("Joueur lu");
+
         return joueur;
     }
 
-    public List<Joueur> list(){
-        Connection conn = null;
-        List<Joueur> joueurs = new ArrayList<>();
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            //MySQL driver MySQL Connector
-            conn = dataSource.getConnection();
-
-            PreparedStatement statement = conn.prepareStatement("SELECT ID,NOM,PRENOM,SEXE FROM JOUEUR");
-
-            ResultSet rs = statement.executeQuery();
-
-            while(rs.next()){
-                Joueur joueur = new Joueur();
-                joueur.setId(rs.getLong("id"));
-                joueur.setNom(rs.getString("nom"));
-                joueur.setPrenom(rs.getString("prenom"));
-                joueur.setSexe(rs.getString("sexe").charAt(0));
-                joueurs.add(joueur);
-            }
-
-
-            System.out.println("Joueurs lus");
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                if(conn!=null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-
-        }
-        finally {
-            try {
-                if (conn!=null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+    public List<Joueur> list(char sexe){
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Query<Joueur> query = session.createQuery("select j from Joueur j where j.sexe=?0",Joueur.class); //on peut preciser l'index du param juste apres le ?
+        query.setParameter(0,sexe);
+        List<Joueur> joueurs = query.getResultList();
+        System.out.println("Joueurs lu");
         return joueurs;
     }
 
