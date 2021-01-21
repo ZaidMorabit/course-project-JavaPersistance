@@ -1,12 +1,15 @@
 package com.mycompany.tennis.core.repository;
 
 import com.mycompany.tennis.core.DataSourceProvider;
+import com.mycompany.tennis.core.EntityManagerHolder;
 import com.mycompany.tennis.core.entity.Joueur;
 import org.hibernate.Session;
 import com.mycompany.tennis.core.HibernateUtil;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -99,8 +102,10 @@ public class JoueurRepositoryImpl {
     }
 
     public List<Joueur> list(char sexe){
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        Query<Joueur> query = session.createQuery("select j from Joueur j where j.sexe=?0",Joueur.class); //on peut preciser l'index du param juste apres le ?
+        EntityManager em = EntityManagerHolder.getCurrentEntityManager();
+        //Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        //Query<Joueur> query = session.createQuery("select j from Joueur j where j.sexe=?0",Joueur.class); //on peut preciser l'index du param juste apres le ?
+        TypedQuery<Joueur> query = em.createQuery("select j from Joueur j where j.sexe=?0",Joueur.class); //on peut preciser l'index du param juste apres le ?
         query.setParameter(0,sexe);
         List<Joueur> joueurs = query.getResultList();
         System.out.println("Joueurs lu");

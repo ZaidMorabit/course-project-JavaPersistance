@@ -1,11 +1,13 @@
 package com.mycompany.tennis.core.repository;
 
 import com.mycompany.tennis.core.DataSourceProvider;
+import com.mycompany.tennis.core.EntityManagerHolder;
 import com.mycompany.tennis.core.entity.Tournoi;
 import org.hibernate.Session;
 import com.mycompany.tennis.core.HibernateUtil;
 import org.hibernate.Transaction;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,8 +15,10 @@ import java.util.List;
 
 public class TournoiRepositoryImpl {
     public void create(Tournoi tournoi){
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.persist(tournoi);
+        EntityManager em = EntityManagerHolder.getCurrentEntityManager();
+        //Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        //session.persist(tournoi);
+        em.persist(tournoi);
         System.out.println("Tournoi créé");
     }
 
@@ -24,15 +28,18 @@ public class TournoiRepositoryImpl {
     }
 
     public void delete(long id){
+        EntityManager em = EntityManagerHolder.getCurrentEntityManager();
+        //Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         Tournoi tournoi = getById(id);
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.delete(tournoi);
+        em.remove(tournoi);
         System.out.println("Tournoi supprimé");
     }
 
     public Tournoi getById(long id){
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        Tournoi tournoi = session.get(Tournoi.class,id);
+        EntityManager em = EntityManagerHolder.getCurrentEntityManager();
+        //Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        //Tournoi tournoi = session.get(Tournoi.class,id);
+        Tournoi tournoi = em.find(Tournoi.class,id);
         System.out.println("Tournoi lu");
         return tournoi;
     }

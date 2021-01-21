@@ -4,7 +4,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Set;
-@org.hibernate.annotations.NamedQuery(name = "given_sexe",query = "select e from Epreuve e join fetch e.tournoi where e.tournoi.code=?0")
+@NamedQuery(name = "given_name",query = "select e from Epreuve e join fetch e.tournoi where e.tournoi.code=?0")
 @Entity
 public class Epreuve {
 

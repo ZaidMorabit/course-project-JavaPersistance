@@ -5,11 +5,10 @@
     <persistence-unit name="tennis-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <!--pas besoin de declarer cette fois ci car autodetecté  mais c'est recommandé-->
-        <class>com.mycompany.tennis.core.entity.Joueur</class>
+        <!--class>com.mycompany.tennis.core.entity.Joueur</class>
         <class>com.mycompany.tennis.core.entity.Epreuve</class>
         <class>com.mycompany.tennis.core.entity.Match</class>
-        <class>com.mycompany.tennis.core.entity.Score</class>
+        <class>com.mycompany.tennis.core.entity.Score</class>-->
 		<class>com.mycompany.tennis.core.entity.Tournoi</class>
 
         <properties>
